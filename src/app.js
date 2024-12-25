@@ -2,6 +2,7 @@ const compression = require('compression')
 const helmet = require('helmet')
 const express = require('express')
 const morgan = require('morgan')
+
 const app = express()
 
 // Middlewares
@@ -16,7 +17,7 @@ app.use(helmet())
 
 // Routes
 app.get('/', (req, res, next) => {
-    res.send('Hello World')
+    res.status(200).json('Hello World')
 })
 
 // Error handler
