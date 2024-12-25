@@ -1,6 +1,6 @@
 # ecommerce-shopbee
 
-## timeline
+# timeline
 
-# basic
+## basic
 1/ init project -> DONE
