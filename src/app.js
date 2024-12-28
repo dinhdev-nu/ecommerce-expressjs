@@ -19,11 +19,24 @@ require('./dbs/init.mongodb')
 require('./helpers/check.connect')
 
 // Routes
-app.get('/', (req, res, next) => {
-    res.status(200).json('Hello World')
-})
+app.use('/', require('./routers/index'))
 
 // Error handler
+app.use((req, res, next) => {
+    const status = 404
+    const error = new Error('Not Found!!')
+    error.status = status
+    next(error)
+})
 
+app.use((error, req, res, next) => {
+    const status = error.statusCode || 500
+    return res.status(status).send({
+        status: "Error",
+        code: status,
+        message: error.message || 'Internal Server Error',
+        stack: error.stack
+    })
+})
 
 module.exports = app
