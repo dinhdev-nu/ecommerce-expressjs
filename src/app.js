@@ -25,7 +25,7 @@ app.use('/', require('./routers/index'))
 app.use((req, res, next) => {
     const status = 404
     const error = new Error('Not Found!!')
-    error.status = status
+    error.statusCode = status
     next(error)
 })
 

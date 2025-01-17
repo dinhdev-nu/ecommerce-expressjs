@@ -32,7 +32,7 @@ const createTokenPair = async ({payload, publicKey, privateKey}) => {
     }
 }
 
-const handleRefreshToken = async(req, res, next) => {
+const authentication = async(req, res, next) => {
     const userId = req.headers[HEADER.CLIENT_ID]?.toString()
     if(!userId){
         throw new AuthFailureError('Invalid User')
@@ -61,8 +61,7 @@ const handleRefreshToken = async(req, res, next) => {
         throw new AuthFailureError('Invalid User')
     }
     const decoded = await verifyToken(accessToken, tokens.public_key)
-
-    if(decoded.userId !== userid){
+    if(decoded.userId !== userId){
         throw new AuthFailureError('Invalid User')
     }
 
@@ -75,12 +74,16 @@ const verifyToken = async(token, publicKey) => {
         const decoded = await jwt.verify(token, publicKey)
         return decoded
     } catch (error) {
-        throw error
+        if (error.name === 'TokenExpiredError') {
+            throw new BadRequestError('Token has expired');
+        } else if (error.name === 'JsonWebTokenError') {
+            throw new AuthFailureError('Invalid token');
+        }
     }
 }
 
 module.exports = {
     createTokenPair,
     verifyToken,
-    handleRefreshToken
+    authentication
 }

@@ -1,17 +1,23 @@
-'use strict'
+const { pick } = require("lodash")
 
-const _ = require('lodash')
+const a = {
+    b: 1,
+    c: 2,
+    d: null,
+    m: 1,
+    e: undefined,
+    o: {
+        f: 3,
+        g: null,
+        h: undefined,
+        i: {
+            j: 4,
+            k: null,
+            l: undefined
+        }
+    }
+}
 
-const getInforData = (data, infor = [] ) => {
-    return _.pick(data, infor)
-}
-const getUnSelect = (unSelect) => {
-    return unSelect.map( item => `-${item}`).join(" ")
-}
-
-const getSelect = select => {
-    return select.join(" ")
-}
 const removeEmptyValuesForPayload = payload => {
     const result = {}
     Object.keys(payload).forEach(key => {
@@ -40,10 +46,4 @@ const flattenNestedObject = (payload, result = {}, parentKey = null) => {
     return result
 }
 
-module.exports = {
-    getInforData,
-    getUnSelect,
-    getSelect,
-    removeEmptyValuesForPayload,
-    flattenNestedObject
-}
+console.log(Object.keys([1,2,3,4,5,6,7,8,9,0]))
