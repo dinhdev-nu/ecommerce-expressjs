@@ -13,6 +13,6 @@ class SuccessResponse {
     }
 }
 
-module.exports ={
+module.exports = {
     SuccessResponse
 }

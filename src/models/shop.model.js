@@ -30,8 +30,9 @@ const ShopSchema = new Schema ({
         default: false
     },
     roles:{
-        type: Array,
-        default: []
+        type: String,
+        default: 'shop'
+
     }
 }, {
     timestamps: true,

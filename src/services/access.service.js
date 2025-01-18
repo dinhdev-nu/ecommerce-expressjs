@@ -1,17 +1,18 @@
 'use strict'
 
 const shopModel = require('../models/shop.model')
+const userModel = require('../models/user.model')
+const tokenModel = require('../models/token.model')
 const { BadRequestError } = require('../core/error.respon')
 const bcrypt = require('bcrypt')
 const crypto = require('node:crypto')   
 const { createTokenPair } = require('../auths/authUtils')
 const { getInforData } = require('../utils')
 const { createToken } = require('./token.service')
-const tokenModel = require('../models/token.model')
 
 class AccessService {
 
-    static handleRefreshToken = async({user, refreshToken, tokens}) => {
+    static handleRefreshToken = async({user, refreshToken, tokens, model }) => {
         try {
 
             const { userId, email } = user
@@ -27,8 +28,8 @@ class AccessService {
             if(tokens.refresh_token !== refreshToken)
                 throw new BadRequestError('Shop not registered!')
 
-            const foundshop = await shopModel.findOne({email: user.email}).lean()
-            if(!foundshop)  
+            const foundUser = await model.findOne({email: user.email}).lean()
+            if(!foundUser)  
                 throw new BadRequestError('Shop not registered!')
             const payload = {
                 userId,
@@ -41,32 +42,10 @@ class AccessService {
             await tokens.save()
 
             return{
-                shop: getInforData(foundshop, ['_id', 'name', 'email']),
+                shop: getInforData(foundUser, ['_id', 'name', 'email']),
                 tokens: tokenPair
             }
-            // privateKey = crypto.randomBytes(64).toString('hex')
-            // publicKey = crypto.randomBytes(64).toString('hex')
-
-            // payload = {
-            //     userId,
-            //     email
-            // }
-            // const tokenPair = await createTokenPair({payload, publicKey, privateKey})
-
-
-            // const result = await createToken({
-            //     userId, 
-            //     publicKey, privateKey, 
-            //     refreshToken: tokenPair.refreshToken,
-            //     refreshTokenUsed: [refreshToken]
-            // })
-
-            // return {
-            //     shop: getInforData(user, ['_id', 'email']),
-            //     tokens: tokenPair
-            // }
-
-
+            
         } catch (error) {
             throw error
         }
@@ -83,10 +62,10 @@ class AccessService {
         }
     }
 
-    static login = async({email, password}) => {
+    static login = async({email, password, model}) => {
         try {
 
-            const foundEmail = await shopModel.findOne({email}).lean()
+            const foundEmail = await model.findOne({email}).lean()
             if(!foundEmail)
                 throw new BadRequestError('Email or password is incorrect or not found')
             
@@ -119,23 +98,27 @@ class AccessService {
 
     }
 
-    static signup = async({name, email, password}) => {
+    static signup = async({ name, email, password, model, roles }) => {
         try {
-            const foundEmail = await shopModel.findOne({email}).lean()
+            
+            const foundEmail = await model.findOne({email}).lean()
 
             if(foundEmail)
                 throw new BadRequestError('Email already exists')
 
             const hashPassword = await bcrypt.hash(password, 10)
 
-            const newShop = await shopModel.create({
+            const newUser = await model.create({
                 name,
                 email,
                 password: hashPassword,
-                roles: ['shop']
+                roles: roles
             })
-
-            return newShop
+            userModel.create({
+                userId: newUser._id,
+                roles: roles
+            })
+            return newUser
         } catch (error) {
             throw error
         }

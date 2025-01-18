@@ -2,19 +2,28 @@
 
 const { SuccessResponse } = require('../core/success.respon');
 const AccessService = require('../services/access.service');
+const { block } = require('../services/user.service');
 
 class AccessControler {
     signup = async (req, res, next) => {
         new SuccessResponse({
             message: 'Sign up success',
-            metadata: await AccessService.signup(req.body)
+            metadata: await AccessService.signup({
+                ...req.body,
+                model: req.modelRef,
+                roles: await block(req.roles)
+            })
         }).send(res)
     }
     
     login = async (req, res, next) => {
         new SuccessResponse({
             message: 'Login success',
-            metadata: await AccessService.login(req.body)
+            metadata: await AccessService.login({
+                ...req.body,
+                model: req.modelRef,
+                roles: req.roles
+            })
         }).send(res)
     }
 
@@ -31,7 +40,8 @@ class AccessControler {
             metadata: await AccessService.handleRefreshToken({
                 user: req.user, 
                 refreshToken: req.refreshToken, 
-                tokens: req.tokens
+                tokens: req.tokens,
+                model: req.modelRef
             })
         }).send(res)
     }

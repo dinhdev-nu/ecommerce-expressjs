@@ -24,11 +24,12 @@
 #### **2. User Management (Auth)**
 - **Mục tiêu**: Cần có người dùng để thực hiện các thao tác trong hệ thống.
 - Các chức năng cần làm:
-  - Đăng ký/Đăng nhập bằng email và mật khẩu.
-  - Quản lý thông tin tài khoản (tên, email, địa chỉ).
-  - Quên mật khẩu và đặt lại mật khẩu.
-  - Vai trò (Customer, Admin).
+  - Đăng ký/Đăng nhập bằng email và mật khẩu. -> DONE
+  - Quản lý thông tin tài khoản (tên, email). -> DONE
+  - Quên mật khẩu và đặt lại mật khẩu. -> DONE
+  - Vai trò (Customer, Admin). -> DONE
 
+  - Phân quyền 
 ---
 
 #### **3. Cart Management**
