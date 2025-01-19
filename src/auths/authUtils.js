@@ -8,7 +8,7 @@ const tokenModel = require('../models/token.model')
 const HEADER = {
     CLIENT_ID: 'x-client-id', // id shop
     REFRESHTOKEN: 'x-rtoken-id',
-    AUTHORIZATION: 'athorization' //  accessToken  cua login        
+    AUTHORIZATION: 'authorization' //  accessToken  cua login        
 }
 
 const createTokenPair = async ({payload, publicKey, privateKey}) => {
@@ -77,6 +77,7 @@ const verifyToken = async(token, publicKey) => {
         if (error.name === 'TokenExpiredError') {
             throw new BadRequestError('Token has expired');
         } else if (error.name === 'JsonWebTokenError') {
+            console.log(error)
             throw new AuthFailureError('Invalid token');
         }
     }

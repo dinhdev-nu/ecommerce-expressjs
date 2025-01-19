@@ -86,7 +86,7 @@ class AccessService {
 
             return {
 
-                shop: getInforData(foundEmail, ['_id', 'name', 'email']),
+                user: getInforData(foundEmail, ['_id', 'name', 'email']),
                 tokens: tokenPair,
 
             }

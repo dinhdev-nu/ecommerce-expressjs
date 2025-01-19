@@ -16,7 +16,7 @@
   - Thêm/Sửa/Xóa sản phẩm.  -> DONE
   - Lấy danh sách sản phẩm. -> DONE
   - Tìm kiếm sản phẩm theo tên, danh mục, giá, v.v. -> DONE
-  - Upload hình ảnh sản phẩm. (clouddinary, gg ...)
+ ##### - Upload hình ảnh sản phẩm. (clouddinary, gg ...)
   - Bộ lọc sản phẩm. -> DONE
 
 --- -> DONE 
@@ -29,16 +29,16 @@
   - Quên mật khẩu và đặt lại mật khẩu. -> DONE
   - Vai trò (Customer, Admin). -> DONE
 
-  - Phân quyền 
----
+  #### Phân quyền 
+---  -> DONE 
 
 #### **3. Cart Management**
 - **Mục tiêu**: Xây dựng tính năng giỏ hàng để khách hàng có thể thêm sản phẩm và tính tổng tiền trước khi đặt hàng.
 - Các chức năng cần làm:
-  - Thêm sản phẩm vào giỏ hàng.
-  - Xóa sản phẩm khỏi giỏ hàng.
-  - Cập nhật số lượng sản phẩm.
-  - Tính tổng tiền trong giỏ hàng.
+  - Thêm sản phẩm vào giỏ hàng. -> DONE
+  - Xóa sản phẩm khỏi giỏ hàng. -> DONE
+  - Cập nhật số lượng sản phẩm. -> DONE
+  - Tính tổng tiền trong giỏ hàng. -> DONE
 
 ---
 
