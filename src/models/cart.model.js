@@ -1,4 +1,3 @@
-const e = require('express');
 const { model, Schema } = require('mongoose');
 
 const DOCUMENT_NAME = 'Cart';
@@ -24,7 +23,8 @@ const cartSchema = new Schema({
     },
     cart_count: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     }
 
 }, {

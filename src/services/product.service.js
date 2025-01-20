@@ -12,6 +12,7 @@ const {
     filterProduct
 } = require("../models/repositories/product.repo")
 const { flattenNestedObject, removeEmptyValuesForPayload } = require("../utils")
+const { createInventoryForProduct } = require("./inventory.service")
 
 class ProductFactory {
     //POST create product
@@ -121,6 +122,13 @@ class ProductService {
             ...this,
             _id: prouduct_id
         })
+        if(newProduct){
+            createInventoryForProduct({
+                shop_id: this.product_shop, 
+                product_id: prouduct_id, 
+                inventory: { inventory_stock: this.product_quantity }
+            })
+        }
         return newProduct
     }
 

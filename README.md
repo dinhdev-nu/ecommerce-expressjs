@@ -41,6 +41,8 @@
   - Tính tổng tiền trong giỏ hàng. -> DONE
 
 ---
+### 3.b inventiry, discount ... 
+
 
 #### **4. Order Management**
 - **Mục tiêu**: Hỗ trợ khách hàng đặt hàng và theo dõi trạng thái đơn hàng.
