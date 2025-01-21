@@ -77,7 +77,6 @@ const verifyToken = async(token, publicKey) => {
         if (error.name === 'TokenExpiredError') {
             throw new BadRequestError('Token has expired');
         } else if (error.name === 'JsonWebTokenError') {
-            console.log(error)
             throw new AuthFailureError('Invalid token');
         }
     }

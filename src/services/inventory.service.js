@@ -31,7 +31,6 @@ const createInventoryForProduct = async ({ product_id, shop_id, inventory }) => 
 }
 
 const updateInventoryForProduct = async ({
-    // update in product quannity ...
 
     shop_id, product_id, quantity_new, quantity_old, location
 }) => {
@@ -43,7 +42,7 @@ const updateInventoryForProduct = async ({
     if(inventory) {
         // update in product quannity ...
 
-        
+
         const newHistory = await createHistoryInventory({
             inventory_id: inventory._id,
             action: 'restock',
