@@ -41,7 +41,7 @@
   - Tính tổng tiền trong giỏ hàng. -> DONE
 
 ---
-### 3.b inventiry, discount ... 
+### 3.b inventiry, discount ...  ->DONE
 
 
 #### **4. Order Management**
@@ -51,7 +51,7 @@
   - Lưu trạng thái đơn hàng (Pending, Processing, Shipped, Completed, Cancelled).
   - Lịch sử đơn hàng cho khách hàng.
 
----
+--- -> DONE
 
 #### **5. Payment Integration**
 - **Mục tiêu**: Cần có tính năng thanh toán để đơn hàng được xác nhận.
