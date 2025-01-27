@@ -29,7 +29,7 @@
   - Quên mật khẩu và đặt lại mật khẩu. -> DONE
   - Vai trò (Customer, Admin). -> DONE
 
-  #### Phân quyền 
+  #### Phân quyền  -> DONE
 ---  -> DONE 
 
 #### **3. Cart Management**
@@ -42,7 +42,7 @@
 
 ---
 ### 3.b inventiry, discount ...  ->DONE
-
+### 3.c Comment => DONE
 
 #### **4. Order Management**
 - **Mục tiêu**: Hỗ trợ khách hàng đặt hàng và theo dõi trạng thái đơn hàng.
