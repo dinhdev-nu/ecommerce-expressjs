@@ -7,23 +7,23 @@ const userModel  = require('../models/user.model')
 const {asyncHandler } = require('../helpers/catch.error')
 const { permission } = require("process")
 
-const authorize = async ()=> {
-    return async ( req, res, next ) => {
+const authorize = async (roles)=> {
+    return asyncHandler(async ( req, res, next ) => {
         const user_id = req.user.userId
         const findRole = await userModel.findOne({ _id: user_id }).lean()
-        const permission = await permissionModel.find({
-            role_name: findRole.roles 
-        }).lean()
+        if(!roles.includes(findRole.roles)) {
+            throw new ForbiddenError('You do not have permission to access this resource')
+        }
         if(!permission) {
             throw new ForbiddenError('You do not have permission to access this resource')
         }
         next()  
-    }
+    })
     
 }
 
 // const authorize2 = async (permissions)=> {
-//     return async ( req, res, next ) => {
+//     return asyncHandler(async ( req, res, next ) => {
 //         const user_id = req.user.userId
 //         const findRole = await userModel.findOne({ _id: user_id }).lean()
 //         const permission = await permissionModel.find({
@@ -38,11 +38,11 @@ const authorize = async ()=> {
 //             }
 //         })
 //         next()  
-//     }
+//     })
     
 // }
 
 module.exports = {
-    authorize : asyncHandler(authorize)
+    authorize
     // authorize2
 }

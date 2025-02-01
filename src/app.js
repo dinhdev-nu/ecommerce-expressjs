@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true}))
 app.use(morgan('dev'))
 app.use(compression())
 app.use(helmet())
+app.use(require('./middlewares/cors.middleware'))
 
 // DB Connection
 require('./dbs/init.mongodb')
