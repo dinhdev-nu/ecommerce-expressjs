@@ -1,4 +1,5 @@
 const compression = require('compression')
+const cookieParser = require('cookie-parser')
 const express = require('express')
 const { default: helmet } = require('helmet')
 const morgan = require('morgan')
@@ -12,7 +13,22 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true}))
 app.use(morgan('dev'))
 app.use(compression())
+app.use(cookieParser())
 app.use(helmet())
+
+// Tùy chỉnh Content-Security-Policy (CSP)
+app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'", "http://localhost:3000"], // Chỉ cho phép tài nguyên từ cùng nguồn gốc
+        scriptSrc: ["'self'"], // Hạn chế script bên ngoài
+        styleSrc: ["'self'"], // Hạn chế CSS bên ngoài
+        imgSrc: ["'self'", "data:"], // Hạn chế hình ảnh từ nguồn đáng tin cậy
+      },
+    })
+  );
+app.use(helmet.xssFilter());
+  
 app.use(require('./middlewares/cors.middleware'))
 
 // DB Connection

@@ -7,10 +7,12 @@ const { authentication } = require('../../auths/authUtils');
 const { handleRoleUser }  = require('../../services/user.service')
 const router = Router()
 
-router.use(asyncHandler(handleRoleUser))
+router.use(handleRoleUser)
+ 
 
-router.post('/signup/:roles', asyncHandler(accessController.signup))
-router.post('/login/:roles', asyncHandler(accessController.login))
+// roles? là parmas có thể có hoặc không
+router.post('/signup/:roles?', asyncHandler(accessController.signup))
+router.post('/login/:roles?', asyncHandler(accessController.login))
 
 router.use(asyncHandler(authentication))
 

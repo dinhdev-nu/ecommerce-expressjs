@@ -118,7 +118,7 @@ class AccessService {
                 userId: newUser._id,
                 roles: roles
             })
-            return newUser
+            return getInforData( newUser, ['_id', 'name'])
         } catch (error) {
             throw error
         }

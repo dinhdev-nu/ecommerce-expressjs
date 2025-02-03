@@ -4,18 +4,17 @@ const { BadRequestError } = require('../core/error.respon')
 
 const handleRoleUser = async (req, res, next) => {
     const url = req.originalUrl
+    console.log(url)
     let modelRef, roles
     if( url.includes('admin') ){ 
         roles = 'admin'
-        modelRef = require('../models/customer.model')
-    } else if( url.includes('customer') || url === '/v1/api/access/signup' ){
-        roles = 'customer'
         modelRef = require('../models/customer.model')
     } else if ( url.includes('shop') ){
         roles = 'shop'
         modelRef = require('../models/shop.model')
     } else {
-        throw new BadRequestError("Invalid roles")
+        roles = 'customer'
+        modelRef = require('../models/customer.model')
     }
     req.roles = roles
     req.modelRef = modelRef

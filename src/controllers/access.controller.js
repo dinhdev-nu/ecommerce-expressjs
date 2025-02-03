@@ -24,7 +24,7 @@ class AccessControler {
                 model: req.modelRef,
                 roles: req.roles
             })
-        }).send(res)
+        }).sendAndSetToken(res)
     }
 
     logout = async (req, res, next) => {
