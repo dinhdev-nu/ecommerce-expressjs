@@ -42,8 +42,7 @@ class AccessService {
             await tokens.save()
 
             return{
-                shop: getInforData(foundUser, ['_id', 'name', 'email']),
-                tokens: tokenPair
+                token: tokenPair.accessToken
             }
             
         } catch (error) {
@@ -55,7 +54,6 @@ class AccessService {
     static logout = async(userId) => {
         try {
             const result = await tokenModel.deleteOne({user: userId})
-
             return result
         } catch (error) {
             throw error
@@ -86,7 +84,7 @@ class AccessService {
 
             return {
 
-                user: getInforData(foundEmail, ['_id', 'name', 'email']),
+                user: getInforData(foundEmail, ['_id', 'name', 'email', 'roles']),
                 tokens: tokenPair,
 
             }
@@ -122,7 +120,6 @@ class AccessService {
         } catch (error) {
             throw error
         }
-
     }
 }
 

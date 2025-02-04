@@ -3,6 +3,7 @@
 const { SuccessResponse } = require('../core/success.respon');
 const AccessService = require('../services/access.service');
 const { block } = require('../services/user.service');
+require('dotenv').config()
 
 class AccessControler {
     signup = async (req, res, next) => {
@@ -28,6 +29,9 @@ class AccessControler {
     }
 
     logout = async (req, res, next) => {
+        res.clearCookie(process.env.JWT_KEY, { 
+            path: '/'
+        })
         new SuccessResponse({
             message: 'Logout success',
             metadata: await AccessService.logout(req.user.userId)

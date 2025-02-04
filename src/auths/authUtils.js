@@ -1,8 +1,7 @@
 'use strict'
 
 const jwt = require('jsonwebtoken')
-const { ForbiddenError, AuthFailureError,  BadRequestError } = require('../core/error.respon')
-const shopModel = require('../models/shop.model')
+const { AuthFailureError,  BadRequestError } = require('../core/error.respon')
 const tokenModel = require('../models/token.model')
 
 const HEADER = {
@@ -35,13 +34,15 @@ const createTokenPair = async ({payload, publicKey, privateKey}) => {
 const authentication = async(req, res, next) => {
     const userId = req.headers[HEADER.CLIENT_ID]?.toString()
     if(!userId){
-        throw new AuthFailureError('Invalid User')
+        throw new AuthFailureError('Invalid User ')
     }
     const tokens = await tokenModel.findOne({user: userId})
     if(!tokens){
         throw new AuthFailureError('Invalid User or user was logout')
     }
+    
 
+    // case refresh token from headers
     const refreshToken = req.headers[HEADER.REFRESHTOKEN]?.toString()
     if(refreshToken){
         const decoded = await verifyToken(refreshToken, tokens.private_key)
@@ -56,18 +57,47 @@ const authentication = async(req, res, next) => {
         return next()
     }
 
-    const accessToken = req.headers[HEADER.AUTHORIZATION]?.toString()
+    const token = req.headers[HEADER.AUTHORIZATION]?.toString()
+    const accessToken = token?.split(' ')[1]
+    
     if(!accessToken){
-        throw new AuthFailureError('Invalid User')
+        throw new AuthFailureError('Invalid User ')
     }
     const decoded = await verifyToken(accessToken, tokens.public_key)
     if(decoded.userId !== userId){
-        throw new AuthFailureError('Invalid User')
+        throw new AuthFailureError('Invalid User ')
     }
 
     req.user = decoded
     return next()
 }
+
+// case refresh token from cookies
+const handleToken = async(req, res, next) => {
+    if(!userId){
+        throw new AuthFailureError('Invalid User ')
+    }
+    const tokens = await tokenModel.findOne({user: userId})
+    if(!tokens){
+        throw new AuthFailureError('Invalid User or user was logout')
+    }
+    const refreshToken = req.cookies[process.env.JWT_KEY]?.toString()
+    if(!refreshToken){
+        throw new AuthFailureError('Invalid User ')
+    }
+    const decoded = await verifyToken(refreshToken, tokens.private_key)
+
+    if(decoded.userId !== userId){
+        throw new AuthFailureError('Invalid User')
+    }
+
+    req.user = decoded,
+    req.tokens = tokens,
+    req.refreshToken = refreshToken
+    return next()
+    
+}
+
 
 const verifyToken = async(token, publicKey) => {
     try {
@@ -85,5 +115,6 @@ const verifyToken = async(token, publicKey) => {
 module.exports = {
     createTokenPair,
     verifyToken,
-    authentication
+    authentication,
+    handleToken
 }
