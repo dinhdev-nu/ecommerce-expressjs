@@ -39,11 +39,19 @@ class ProductFactory {
         return await searchProduct(keySearch)
     }
     static async getAllProductsByShop( shopId ){
-        const unSelect = ['createdAt', 'updatedAt', '__v']
+        const unSelect = 
+        ['updatedAt', '__v', 'product_shop', 
+        'product_slug', 'product_average_rating',
+        'product_variation'
+        ]
         return await getAllProductsByShop({ shopId, unSelect })
     }
     static async getProductDraftsByShop( shopId ){
-        const unSelect = ['createdAt', 'updatedAt', '__v']
+        const unSelect = 
+        ['updatedAt', '__v', 'product_shop', 
+        'product_slug', 'product_average_rating',
+        'product_variation'
+        ]
         return await getProductDraftsByShop({ shopId, unSelect })
     }
     static async getProductPublishedByShop( shopId ){
@@ -272,7 +280,7 @@ class Electrics extends ProductService {
 
 ProductFactory.set_to_list_type("Clothing", Clothing);
 ProductFactory.set_to_list_type("Furniture", Furniture);
-ProductFactory.set_to_list_type("Electrics", Electrics);
+ProductFactory.set_to_list_type("Electronics", Electrics);
 
 
 module.exports = ProductFactory

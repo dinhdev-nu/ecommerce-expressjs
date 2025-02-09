@@ -22,7 +22,7 @@ const ProductSchema = new Schema({
     product_type: {
         type: String,
         required: true,
-        enum: ['Clothing', 'Electrics', 'Furniture']
+        enum: ['Clothing', 'Electronics', 'Furniture']
     },
     product_attributes: {
         type: Schema.Types.Mixed,
@@ -44,14 +44,12 @@ const ProductSchema = new Schema({
     isDraft: {
         type: Boolean,
         default: true,
-        index: true,
-        select: false
+        index: true
     },
     isPublic: {
         type: Boolean,
         default: false,
-        index: true,
-        select: false
+        index: true
     }
 
 }, {
@@ -102,6 +100,6 @@ const Furniture = new Schema({
 module.exports = {
     product: model(DOCUMENT_NAME, ProductSchema),
     clothing: model('Clothing', Clothing),
-    electrics: model('Electrics', Electrics),
+    electrics: model('Electronics', Electrics),
     furniture: model('Furniture', Furniture)
 }
