@@ -7,7 +7,9 @@ const {
     getAllActiveDiscounts,
     getDiscountsForShop,
     getDetailDiscount,
-    applyDiscount
+    applyDiscount,
+    updateStatus,
+    getDiscountsForProduct
 } = require('../services/discount.service')
 const { SuccessResponse } = require('../core/success.respon')
 
@@ -35,13 +37,22 @@ class DiscountController {
         }).send(res)
     }
 
+    updateStatus = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "Update status discount success",
+            metadata: await updateStatus({
+                discount_id: req.params.discount_id,
+                shop_id: req.user.userId
+            })
+        }).send(res)
+    }
     
     deleteDiscount = async (req, res, next) => {
         new SuccessResponse({
             message: "Delete discount success",
             metadata: await deleteDiscount({
-                discount_code: req.params.discount_code,
-                discount_shopId: req.user.userId
+                discount_id: req.params.discount_id,
+                shop_id: req.user.userId
             })
         }).send(res)
     }
@@ -58,31 +69,37 @@ class DiscountController {
         new SuccessResponse({
             message: "Get discounts success",
             metadata: await getDiscountsForShop({
-                discount_shopId: req.user.userId,
+                shop_id: req.user.userId,
                 discount_type: req.query.discount_type
             })
         }).send(res)
     }
     getAllActiveDiscounts = async (req, res, next) => {
         new SuccessResponse({
-            message: "Get all active discounts success",
+            message: "Get all active discounts success", 
             metadata: await getAllActiveDiscounts({
                 discount_shopId: req.query.shop_id,
                 discount_type: req.query.type
             })
         }).send(res)
     }
+    getDiscountsForProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: "Get discounts for product success",
+            metadata: await getDiscountsForProduct({
+                product_id: req.params.productId,
+                shop_id: req.query.shopId
+            })
+        }).send(res)
+    }
+    
     applyDiscount = async ( req, res, next) => {
         new SuccessResponse({
             message: "Apply discount success",
             metadata: await applyDiscount({
-                discount_code: req.body.discount_code,
-                discount_shopId: req.body.discount_shopId,
-
                 discount: req.discount,
-
-                products: req.body.products, 
-                order_value: req.body.order_value
+                
+                product: req.body.product, 
             })
         }).send(res)
     }

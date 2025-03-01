@@ -37,6 +37,10 @@ inventorySchema.pre('save', function(next){
     this.status = this.inventory_stock > 0 ? 'in_stock' : 'out_of_stock'
     next()
 })
+inventorySchema.pre('updateOne', function(next){
+    this.status = this.inventory_stock > 0 ? 'in_stock' : 'out_of_stock'
+    next()
+})
 
 const inventoriesHisotrySchema = new Schema({
     inventory_id: {

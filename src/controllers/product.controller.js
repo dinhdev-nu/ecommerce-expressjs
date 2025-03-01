@@ -43,6 +43,14 @@ class ProductController {
             })
         }).send(res)
     }
+    getProductDetail = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: "Get product detail",
+            metadata: await ProductFactory.getProductDetail(
+                req.params.product_id
+            )
+        }).send(res)
+    }
 
     searchProduct = async ( req, res, next ) => {
         new SuccessResponse({

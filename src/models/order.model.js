@@ -17,9 +17,16 @@ const orderSchema = new Schema({
             required: true,
             ref: 'Product'
         },
+        product_name: { type: String, required: true },
         product_quantity: { type: Number, required: true },
-        product_price: { type: Number, required: true }
-    }],
+        product_price: { type: Number, required: true },
+        discount_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Discount'
+        },  
+        discount_amount: { type: Number, default: 0 },
+        final_price: { type: Number, required: true }
+    }, { _id: false }],
     order_total: {
         type: Number,
         required: true
@@ -27,13 +34,14 @@ const orderSchema = new Schema({
     order_status: {
         type: String,
         enum: ['pending', 'paid', 'shipped', 'completed', 'cancelled'],
-        default: 'pending',
+        required: true,
+        default: 'pending'
     },
     order_payment: {
         payment_method: {
             type: String,
             enum: ['card', 'cash', 'paypal'],
-            required: true
+            default: 'card'
         },
         payment_status: {
             type: String,
@@ -43,22 +51,25 @@ const orderSchema = new Schema({
     },
     order_address: {
         full_name: { type: String, required: true },
-        address: { type: String, required: true },
-        city: { type: String, required: true },
-        postal_code: { type: String, required: true },
-        country: { type: String, required: true },
+        phone_number: { type: String, required: true },
+        province: { type: String, required: true },
+        district: { type: String, required: true },
+        ward: { type: String, required: true },
     },
-    order_note: { type: String, default: ''},
-    order_discount: {
-        discount_code: { type: String, default: '' },
-        discount_amount: { type: Number, default: 0 },
-        discount_for_product: {type: Schema.Types.ObjectId, ref: 'Product'}
-    }
+    order_note: { type: String, default: 'This order has no note' },
+    order_expiredAt: { 
+        type: Date,  
+        default: new Date(Date.now() + 5 * 60 * 1000) 
+    },
     
 }, {
     timestamps: true,
     collection: COLLECTION_NAME
 })
+
+
+// Expire after 5 minutes (300 seconds)
+orderSchema.index({ order_expiredAt: 1 }, { expireAfterSeconds: 0 })
 
 
 

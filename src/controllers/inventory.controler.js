@@ -29,7 +29,7 @@ class InventoryControler {
             message: "Update inventory success",
             metadata: await updateInventoryForProduct({
                 shop_id: req.user.userId,
-                product_id: req.body.product_id,
+                inventory_id: req.body.inventory_id,
                 quantity_new: req.body.quantity_new,
                 quantity_old: req.body.quantity_old,
                 location: req.body.location

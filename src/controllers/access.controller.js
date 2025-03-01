@@ -47,7 +47,7 @@ class AccessControler {
                 tokens: req.tokens,
                 model: req.modelRef
             })
-        }).send(res)
+        }).sendAndSetToken(res)
     }
 }
 

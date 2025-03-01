@@ -19,7 +19,9 @@ const getOneProductPublish= async (product_id) => {
         isDraft: false,
         isPublic: true
     }
-    return await product.findOne(fillter).lean()
+    return await product.findOne(fillter)
+                        .select('-updatedAt -__v -isDraft -isPublic')
+                        .lean()
 }
 const getOneProductDraft = async (product_id) => {
     const fillter = {
@@ -107,7 +109,6 @@ const deleteProduct = async ({product_id, model}) => {
         isDraft: true,
         isPublic: false
     }
-    console.log(model)
     return await model.deleteOne(fillter)
 }
 const deleteChildProduct = async ({product_id, model}) => {

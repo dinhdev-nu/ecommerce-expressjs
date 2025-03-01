@@ -10,6 +10,7 @@ router.get('/', asyncHandler(productController.getAllProducts)) // OK
 router.get('/search', asyncHandler(productController.searchProduct)) // OK
 router.get('/shop/publish/:shop_id', asyncHandler(productController.getProductPublishedByShop)) // OK
 router.get('/filter', asyncHandler(productController.filterProduct))
+router.get('/detail/:product_id', asyncHandler(productController.getProductDetail)) // OK
 
 router.use(asyncHandler(authentication))
 // create

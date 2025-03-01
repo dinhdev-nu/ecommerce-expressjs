@@ -40,10 +40,31 @@ const flattenNestedObject = (payload, result = {}, parentKey = null) => {
     return result
 }
 
+const joinArraysByIdByMap = (arr1, key1, arr2, key2) => {
+    const map = new Map(arr2.map(item => [item[key2], item]))
+    return arr1.map(item => {
+        return {
+            ...item,
+            ...(map.get(item[key1]) || {})
+        }   
+    })
+}
+const joinArraysByIdByLodash = (arr1, key1, arr2, key2) => {
+    const map = _.keyBy(arr2, key2)
+    return arr1.map(item => {
+        return {
+            ...item,
+            ...(map[item[key1]] || {})
+        }
+    })
+}
+
 module.exports = {
     getInforData,
     getUnSelect,
     getSelect,
     removeEmptyValuesForPayload,
-    flattenNestedObject
+    flattenNestedObject,
+    joinArraysByIdByMap,
+    joinArraysByIdByLodash
 }

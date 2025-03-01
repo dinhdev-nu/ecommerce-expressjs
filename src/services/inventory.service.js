@@ -1,7 +1,6 @@
 'use strict'
 
 const { BadRequestError } = require('../core/error.respon')
-const {} = require('../models/repositories/product.repo')
 const { 
     createInventory, createHistoryInventory ,
     findInventory, getInventoris, getHistoryInventory,
@@ -10,6 +9,9 @@ const {
     deleteHistoryInventory,
 } = require('../models/repositories/inventory.repo')
 const ProductFactory = require('./product.service')
+const { product } = require('../models/product.model')
+const productModel = require('../models/product.model')
+const { InventoryHistory } = require('../models/inventory.model')
 
 
 
@@ -32,27 +34,25 @@ const createInventoryForProduct = async ({ product_id, shop_id, inventory }) => 
 
 const updateInventoryForProduct = async ({
 
-    shop_id, product_id, quantity_new, quantity_old, location
+    shop_id, inventory_id, quantity_new, quantity_old, location
 }) => {
-
-    const inventory = await updateInventory({
-        shop_id, product_id, quantity_new, quantity_old, location
-    })
-
-    if(inventory) {
-        // update in product quannity ...
-
-
-        const newHistory = await createHistoryInventory({
+    
+    try {
+        const inventory = await updateInventory({
+            shop_id, inventory_id, quantity_new, location
+        })
+        await product.findByIdAndUpdate(inventory.inventory_productId, {product_quantity: quantity_new})
+    
+        await InventoryHistory.create({
             inventory_id: inventory._id,
             action: 'restock',
-            quantity: +quantity_new - +quantity_old
-        })
-
-        return { inventory, newHistory }
-    }
-
-    throw new BadRequestError('Inventory update failed ')
+            quantity: quantity_new - quantity_old
+            })
+        return { inventory }
+    } catch (error) {
+        console.log(error)
+        throw new BadRequestError('Update inventory failed')
+    } 
 }
 
 const getInventoryForProduct = async ({
@@ -64,12 +64,16 @@ const getInventoryForProduct = async ({
 const deleteInventoryForProduct = async ({
     shop_id, product_id
 }) => {
-    return await deleteInventory({shop_id, product_id})
+    const inventory = await deleteInventory({shop_id, product_id})
+    if(!inventory)
+        throw new BadRequestError('Inventory not found')
+    deleteHistoryForInventory({inventory_id: inventory._id})
+    return { inventory }
 }
 
 
 const getInventoriesForShop = async ({ shop_id, getStatus }) => {
-    const select = ['inventory_stock', 'inventory_location', 'status']
+    const select = ['inventory_stock', 'inventory_location', 'status', 'createdAt']
 
     return await getInventoris({shop_id, getStatus, select})
 }

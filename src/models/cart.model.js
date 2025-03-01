@@ -16,10 +16,15 @@ const cartSchema = new Schema({
         default: 'active'
     },
     cart_products: {
+        type: [Schema.Types.ObjectId],
+        required: true,
+        ref: 'Product',
+        default: []
+    },
+    cart_preview: {
         type: [Schema.Types.Mixed],
         required: true,
         default: []
-        
     },
     cart_count: {
         type: Number,

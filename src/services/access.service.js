@@ -1,9 +1,8 @@
 'use strict'
 
-const shopModel = require('../models/shop.model')
 const userModel = require('../models/user.model')
 const tokenModel = require('../models/token.model')
-const { BadRequestError } = require('../core/error.respon')
+const { BadRequestError, AuthFailureError } = require('../core/error.respon')
 const bcrypt = require('bcrypt')
 const crypto = require('node:crypto')   
 const { createTokenPair } = require('../auths/authUtils')
@@ -18,19 +17,19 @@ class AccessService {
             const { userId, email } = user
 
             if(!refreshToken)
-                throw new BadRequestError('Invalid User')
+                throw new AuthFailureError('Invalid User')
 
             if(tokens.refreshTokens_used.includes(refreshToken)){
                 await tokenModel.deleteOne({user: userId})
-                throw new BadRequestError('Something went wrong! Please login again')
+                throw new AuthFailureError('Something went wrong! Please login again !!')
             }
 
             if(tokens.refresh_token !== refreshToken)
-                throw new BadRequestError('Shop not registered!')
+                throw new AuthFailureError('Shop not registered!')
 
-            const foundUser = await model.findOne({email: user.email}).lean()
+            const foundUser = await model.findById(tokens.user).lean()
             if(!foundUser)  
-                throw new BadRequestError('Shop not registered!')
+                throw new AuthFailureError('Shop not registered!')
             const payload = {
                 userId,
                 email
@@ -40,13 +39,14 @@ class AccessService {
             tokens.refresh_token = tokenPair.refreshToken
             tokens.refreshTokens_used.push(refreshToken)
             await tokens.save()
-
+            
             return{
-                token: tokenPair.accessToken
+                user: getInforData(foundUser, ['_id', 'name', 'email', 'roles']),
+                tokens: tokenPair,
             }
             
         } catch (error) {
-            throw error
+            throw new BadRequestError(error.message) 
         }
     }
 
@@ -56,7 +56,7 @@ class AccessService {
             const result = await tokenModel.deleteOne({user: userId})
             return result
         } catch (error) {
-            throw error
+            throw new BadRequestError(error.message) 
         }
     }
 
@@ -91,7 +91,7 @@ class AccessService {
 
 
         } catch (error) {
-            throw error
+            throw new BadRequestError(error.message) 
         }
 
     }
@@ -118,7 +118,7 @@ class AccessService {
             })
             return getInforData( newUser, ['_id', 'name'])
         } catch (error) {
-            throw error
+            throw new BadRequestError(error.message) 
         }
     }
 }

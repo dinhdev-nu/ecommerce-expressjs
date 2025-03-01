@@ -7,13 +7,14 @@ class OrderController {
     async createOrder( req, res, next ){
         new SuccessResponse ({
             message: "Order created successfully",
-            metadata: await createOrder ({
+            metadata: await createOrder({
                 order_userId: req.user.userId,
                 ...req.body
             })
         }).send(res)
     }
 
+    
     async updateOrder ( req, res, next ){
         new SuccessResponse ({
             message: "Order updated successfully",

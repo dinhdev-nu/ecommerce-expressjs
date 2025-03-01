@@ -22,7 +22,6 @@ const discountSchema = new Schema({
     discount_start_date: { type: Date, required: true },
     discount_end_date: { type: Date, required: true },
     discount_code: { type: String, required: true, unique: true },
-    discount_status: { type: String, required: true },
     discount_max_usage: {type: Number, required: true },
     discount_current_usage: {type: Number, default: 0 },
     discount_user_used: { type: [Schema.Types.ObjectId], default: [] },

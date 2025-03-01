@@ -1,6 +1,6 @@
 'use strict'
 
-const { NotFoundError } = require("../core/error.respon")
+const { NotFoundError, BadRequestError } = require("../core/error.respon")
 const discountModel = require("../models/discount.model")
 const { Inventory, InventoryHistory } = require("../models/inventory.model")
 const _ = require('lodash')
@@ -12,28 +12,23 @@ const orderModel = require("../models/order.model")
  * {
   "order_userId": "user_id",
   "order_items": [
-    { "product_id": "product_id_1", "product_quantity": 2, "product_price": 100 },
-    { "product_id": "product_id_2", "product_quantity": 1, "product_price": 200 }
+    { "product_id": "product_id_1", "product_quantity": 2, "product_price": 100, "discount_id": "discount_id", final_price: 90 },
+    { "product_id": "product_id_2", "product_quantity": 1, "product_price": 200, "discount_id": "discount_id", final_price: 180 }
   ],
-  "order_payment": { "method": "paypal" },
   "order_address": {
     "full_name": "John Doe",
-    "address": "123 Main Street",
-    "city": "New York",
-    "postal_code": "10001",
-
-    "country": "USA"
+    "phone": "0123456789",
+    "ward": "Ward 1",
+    "district": "District 1",
+    "city": "City 1"
   },
-  "order_notes": "Leave at the front door",
-  "order_discount": [
-        {"discount_code": "DISCOUNT10", "discount_amount": 50, discount_for_product: "12421342112314e" }
-   ]
 }
     * @returns {
   "message": "Order created successfully",
   "data": {
     "orderId": "order_id",
-    "order_total": 350,
+    "order_total": 370,
+    "order_items": ,
     "order_status": "pending"
   }
 }
@@ -46,22 +41,20 @@ const createOrder = async (payload) => {
     try {
         
         const { 
-            order_userId, order_items,
-            order_payment, order_address,   
-            order_note, order_discount
+            order_userId, order_items, order_address,   
         } = payload
 
         // check prouduct availability
-
-        const product_ids = order_items.map(item => item.product_id)
+        const productIds = order_items.map(item => item.product_id)
         const filter = {
             inventory_productId: {
-                $in: product_ids
+                $in: productIds
             }
         }
         const inventory = await Inventory.find(filter)
-                        .populate('inventory_productId', 'product_price', 'isPublic')
+                        .populate('inventory_productId', 'product_name product_price isPublic')
                         .select('inventory_productId inventory_stock')
+                        .lean()
         
         
         const checkListProduct = order_items.filter(item => {
@@ -70,145 +63,128 @@ const createOrder = async (payload) => {
             })
             return !valid || 
                 valid.inventory_stock < item.product_quantity || 
-                !valid.inventory_productId.isPublic 
+                !valid.inventory_productId.isPublic ||
+                valid.inventory_productId.product_price !== item.product_price
         })
 
         if(checkListProduct.length > 0){
-            throw new Error(
-                `Invalid or expired discount codes: ${checkListProduct
-                  .map((d) => d.discount_code)
-                  .join(', ')}`
-              );
+            throw new BadRequestError(`Some products are not available or changed price`);
         }
 
         // check discount code
-        const discount_code = order_discount.map(d => d.discount_code)
-        const foundDiscount = await discountModel.find({ 
-            discount_code: { $in: discount_code }
-        }).lean()
+        const discount_ids = [...new Set(order_items.map(item => item.discount_id).filter(Boolean))]
+        const foundDiscount = discount_ids.length ? await discountModel.find({ 
+            _id: { $in: discount_ids }
+        }).lean() : []
 
-        if (!foundDiscount || foundDiscount.length === 0 && order_discount.length > 0) {
-            throw new Error("No valid discount codes provided.");
+        if (discount_ids.length > 0 && 
+            foundDiscount.length === 0 || 
+            new Set(discount_ids).size !== discount_ids.length) {
+            throw new BadRequestError("No valid discount codes provided.");
         }
 
-        const checkListDiscount = order_discount.filter(dis => {
-            const valid = foundDiscount.find(d => {
-                return d.discount_code === dis.discount_code && 
-                    d.discount_is_active && 
-                    ( d.discount_apply_to === "all" || d.discount_specific_products.includes(dis.discount_for_product) )    
+        if(discount_ids.length > 0){
+            const checkListDiscount = order_items.filter(item => {
+                if(!item.discount_id) return false
+                const discount = foundDiscount.find(d => d._id.toString() === item.discount_id)
+                
+                return !discount || !discount.discount_is_active ||
+                    discount.discount_start_date > new Date() ||
+                    discount.discount_end_date < new Date() ||
+                    discount.discount_current_usage >= discount.discount_max_usage ||
+                    (discount.discount_apply_to !== "all" && !discount.discount_specific_products.includes(item.product_id));
             })
-            return !valid
-        })
-
-        if(checkListDiscount.length > 0){
-            throw new Error(
-                `Invalid or expired discount codes: ${checkListDiscount
-                  .map((d) => d.discount_code)
-                  .join(', ')}`
-              );
+    
+            if(checkListDiscount.length > 0 ){
+                throw new BadRequestError(`Invalid or expired discount codes 2`);
+            }
         }
         // check count
+        let orderTotal = 0, discountTotal = 0
 
-        const order_discount_total = order_discount.reduce((total, dis) => {
-            const valid = foundDiscount.find(d => {
-                return dis.discount_code === d.discount_code
+        order_items.forEach((item) => {
+            const product = inventory.find(i => i.inventory_productId._id.toString() === item.product_id)
+            const discount = foundDiscount.find(d => {
+                return d._id.toString() === item.discount_id
             })
-            return total + ( valid ?  dis.discount_amount : 0 )
-        }, 0)
+            // calculate discount
+            const basePrice = product.inventory_productId.product_price * item.product_quantity
+            let discountAmount = 0
+            if(discount){
+                discountAmount = discount.discount_type === 'percentage' ? 
+                    basePrice * discount.discount_value / 100 : 
+                    discount.discount_value
+            }
+            if(basePrice - discountAmount !== item.final_price){
+                throw new BadRequestError('Product changed price! Please check again')
+            }
 
-        const order_total = order_items.reduce((total, item) => {
-            const product = inventory.find(i => i.inventory_productId.toString() === item.product_id)
-            return total + product.inventory_productId.product_price * item.product_quantity
+            item.product_name = product.inventory_productId.product_name
+            item.discount_amount = discountAmount
+            orderTotal += basePrice
+            discountTotal += discountAmount
+
         })
         
-        const order_total_final = order_total - order_discount_total
+        const orderTotalFinalPrice = orderTotal - discountTotal
 
+        // create order
         const newOrder = await orderModel.create({
             order_userId,
             order_items,
-            order_payment,
             order_address,
-            order_note,
-            order_discount,
-            order_total: order_total_final,
+            order_total: orderTotalFinalPrice,
             order_status: "pending"
         })
         if(!newOrder){
             throw new Error('Order create failed')
         }
+        return {
+            orderId: newOrder._id,
+            order_total: newOrder.order_total,
+            order_items: newOrder.order_items,
+            order_status: newOrder.order_status,
+            order_date: newOrder.createdAt
+        }
 
+        if(order_payment){
+            try {
 
-        // update inventory + transaction
-
-        // CACH 1 FASTER
-        // const session = await Inventory.startSession()
-        // session.startTransaction()
-
-        // try {
-        //     const updateIventory = order_items.map( async item => {
-        //         const validIventory = inventory.find(inv => {
-        //             return inv.inventory_productId._id.toString() === item.product_id
-        //         })
-        //         if(validIventory){
-        //             validIventory.inventory_stock -= item.product_quantity
-        //             await validIventory.save({ session })
-
-        //             await InventoryHistory.create({
-        //                 inventory_id: validIventory._id,
-        //                 quantity: -item.product_quantity,
-        //                 action: 'deduct'
-        //             }, { session })
-        //         }
-        //     })
-        //     await Promise.all(updateIventory)
-        // } catch (error) {
-        //     await session.abortTransaction()
-        //     throw new Error('Order update inventory failed')
-            
-        // } finally {
-        //     session.endSession()
-        // } 
-
-        try {
-            const session = await Inventory.startSession()
-            session.startTransaction()
-
-            for(const item of order_items){
-                const validIventory = inventory.find(inv => {
-                    return inv.inventory_productId._id.toString() === item.product_id
-                })
-                if(validIventory){
-                    validIventory.inventory_stock -= item.product_quantity
-                    await validIventory.save({ session })
-
-                    // create history inventory
-                    await InventoryHistory.create({
-                        inventory_id: validIventory._id,
-                        quantity: -item.product_quantity,
-                        action: 'deduct'
-                    }, { session })
+                for(const item of order_items){
+                    const validIventory = inventory.find(inv => {
+                        return inv.inventory_productId._id.toString() === item.product_id
+                    })
+                    if(validIventory){
+                        validIventory.inventory_stock -= item.product_quantity
+                        await validIventory.save()
+    
+                        // create history inventory
+                        await InventoryHistory.create({
+                            inventory_id: validIventory._id,
+                            quantity: -item.product_quantity,
+                            action: 'deduct'
+                        })
+                    }
                 }
-            }
-
-            await session.commitTransaction()
-
-        } catch (error) {
-            await session.abortTransaction()
-            throw new Error('Order update inventory failed')
-        } finally { 
-            session.endSession()
+    
+    
+            } catch (error) {
+                throw new Error('Order update inventory failed')
+            } 
         }
 
 
         return {
             orderId: newOrder._id,
-            order_total: order_total_final,
+            order_total: newOrder.order_total,
+            order_items: newOrder.order_items,
             order_status: "pending"
         }
         
 
     } catch (error) {
-        throw error
+        console.log(error)
+       throw new BadRequestError("Order create failed")
     }
 }
 

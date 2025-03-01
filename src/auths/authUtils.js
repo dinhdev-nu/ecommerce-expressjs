@@ -1,7 +1,7 @@
 'use strict'
 
 const jwt = require('jsonwebtoken')
-const { AuthFailureError,  BadRequestError } = require('../core/error.respon')
+const { AuthFailureError } = require('../core/error.respon')
 const tokenModel = require('../models/token.model')
 
 const HEADER = {
@@ -74,6 +74,7 @@ const authentication = async(req, res, next) => {
 
 // case refresh token from cookies
 const handleToken = async(req, res, next) => {
+    const userId = req.headers[HEADER.CLIENT_ID]?.toString()
     if(!userId){
         throw new AuthFailureError('Invalid User ')
     }
@@ -105,7 +106,7 @@ const verifyToken = async(token, publicKey) => {
         return decoded
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
-            throw new BadRequestError('Token has expired');
+            throw new AuthFailureError('Token has expired');
         } else if (error.name === 'JsonWebTokenError') {
             throw new AuthFailureError('Invalid token');
         }

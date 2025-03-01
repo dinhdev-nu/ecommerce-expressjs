@@ -1,6 +1,6 @@
 'use strict'
 
-const { BadRequestError } = require("../core/error.respon")
+const { BadRequestError, NotFoundError } = require("../core/error.respon")
 const { product, clothing, furniture, electrics } = require("../models/product.model")
 const { 
     getAllProducts, searchProduct, getAllProductsByShop, 
@@ -34,7 +34,13 @@ class ProductFactory {
             select : ['product_name', 'product_price', 'product_thumb', 'product_quantity']
         })
     }
-
+    static async getProductDetail(product_id){
+        try {
+            return await getOneProductPublish(product_id)
+        } catch (error) {
+            throw new NotFoundError("Product not found")
+        }
+    }
     static async searchProduct(keySearch){
         return await searchProduct(keySearch)
     }

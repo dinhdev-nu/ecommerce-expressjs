@@ -24,7 +24,7 @@ const getInventoris = async ({shop_id, getStatus, select}) => {
                 .select(SELECT)
                 .populate(
                     'inventory_productId', 
-                    getSelect(['product_name', 'product_price', 'product_thumb', 'product_quantity'])
+                    getSelect(['product_name', 'product_thumb'])
                 )
                 .lean()
 }
@@ -50,14 +50,14 @@ const createInventory = async ({shop_id, product_id, payload}) => {
                         .lean()
 }
 
-const updateInventory = async ({shop_id, product_id, quantity_new , quantity_old, location}) => {
+const updateInventory = async ({shop_id, inventory_id, quantity_new, location}) => {
     const filter = {
-        inventory_productId: product_id,
+        _id: inventory_id,
         inventory_shopId: shop_id
     }, 
     update = {
+        inventory_stock: quantity_new,
         $inc: {
-            inventory_stock: +quantity_new - +quantity_old,
             __v: 1
         }
     },
@@ -66,10 +66,10 @@ const updateInventory = async ({shop_id, product_id, quantity_new , quantity_old
     }
     if(location) update.inventory_location = location
 
-    if(+quantity_new === 0 || +quantity_new - +quantity_old + +quantity_old ===0) 
+    if(+quantity_new === 0 ) 
         update.status = 'out_of_stock'
 
-    return await Inventory.findOneAndUpdate(filter, update, options).lean()
+    return await Inventory.findByIdAndUpdate(filter, update, options).lean()
 
 }
 

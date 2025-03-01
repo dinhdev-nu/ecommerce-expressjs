@@ -78,6 +78,7 @@ router.post('/remove', async(req, res) => {
                                 .split('.').slice(0, -1).join('.')
 
         const remove = await cloudinary.uploader.destroy(get_public_id)
+        
         return res.status(200).json({
             message: 'File removed', 
             result: remove
