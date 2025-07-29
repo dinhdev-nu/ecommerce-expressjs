@@ -49,21 +49,35 @@ const getProductPublishedByShop =async ({ shopId, unSelect }) => {
                 .select(unSelect)
                 .lean()
 }
-const searchProduct = async (keySearch) => {
-    const select = getSelect(['_id', 'product_name', 'product_price', 'product_thumb'])
-    return await product.find({
-        $text: {
-            $search: keySearch
-        },
+const searchProduct = async (keySearch, limit = 6) => {
+    const select = getSelect(['product_name', 'product_price', 'product_thumb'])
+    const search = 
+    await product.find({
+        $or: [
+            { product_name: { $regex: keySearch, $options: 'i' } },
+            { product_slug: { $regex: keySearch, $options: 'i' } }
+        ],
         isPublic: true,
         isDraft: false
-    },
-    { score: { $meta: 'textScore' } }
-    ).sort({
-        score: {
-            $meta: "textScore"
-        }
-    }).select(select).lean()
+    }).limit(limit).select(select).lean() 
+    if (search.length === 0) {
+        return await product.find({
+            $text: {
+                $search: keySearch
+            },
+            isPublic: true,
+            isDraft: false
+        },
+        { score: { $meta: 'textScore' } }
+        ).sort({
+            score: {
+                $meta: "textScore"
+            }
+        }).limit(limit).select(select).lean()
+    }
+    return search
+
+    // nên sủ dụng elastic search 
 }
 
 const filterProduct = async (fillter) => {
